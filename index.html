@@ -35,7 +35,8 @@
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 .foot{text-align:center;padding:30px 0 0}
-.foot button{background:none;border:0;color:#cfdcf0;text-decoration:underline;cursor:pointer;font-size:.88rem}
+.foot button{background:rgba(11,36,71,.95);border:2px solid rgba(255,248,234,.4);color:#fff8ea;border-radius:999px;padding:10px 20px;cursor:pointer;font-size:.95rem;font-weight:600;box-shadow:var(--shadow)}
+.foot button:hover{border-color:#fff8ea}
 .err{color:var(--ribbon);font-size:.9rem;margin:0}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{
@@ -200,7 +201,7 @@ dialog h2{font-family:var(--display);margin:0;font-size:1.45rem;line-height:1.15
   </div>
 
   <main class="grid" id="grid"><p class="status">Cargando…</p></main>
-  <footer class="foot"><button id="ownerLink" type="button">Acceso del anfitrión</button></footer>
+  <footer class="foot"><button id="ownerLink" type="button">🔑 Acceso del anfitrión</button></footer>
 </div>
 
 <button class="btn btn-red fab" id="fab" hidden>＋ Añadir regalo</button>
@@ -568,14 +569,18 @@ $("#copyLink").onclick=async()=>{
 };
 
 // ---------- owner login ----------
-$("#ownerLink").onclick=()=>{ $("#lErr").hidden=true; $("#loginDlg").showModal(); };
+function openLogin(){ $("#lErr").hidden=true; if(!$("#loginDlg").open) $("#loginDlg").showModal(); }
+$("#ownerLink").onclick=openLogin;
+// Acceso directo: añade #anfitrion al final de la dirección
+if(location.hash==="#anfitrion") openLogin();
+window.addEventListener("hashchange",()=>{ if(location.hash==="#anfitrion") openLogin(); });
 $("#loginForm").addEventListener("submit",async e=>{
   if(e.submitter && e.submitter.value==="cancel") return;
   e.preventDefault();
   $("#lOk").disabled=true; $("#lErr").hidden=true;
   try{
     await signInWithEmailAndPassword(S.auth,$("#lEmail").value.trim(),$("#lPass").value);
-    $("#loginDlg").close(); $("#lPass").value=""; toast("¡Hola! Ya puedes editar la lista");
+    $("#loginDlg").close(); $("#lPass").value=""; if(location.hash) history.replaceState(null,"",location.pathname+location.search); toast("¡Hola! Ya puedes editar la lista");
   }catch(err){
     $("#lErr").textContent="Correo o contraseña incorrectos."; $("#lErr").hidden=false;
   }
